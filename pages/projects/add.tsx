@@ -1,3 +1,4 @@
+// pages/projects/add.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
@@ -22,6 +23,11 @@ const AddProject: React.FC = () => {
     setLoading(true);
 
     try {
+      // In Supabase v2, use getSession() to retrieve the current session.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const payload = {
         name,
         description,
@@ -31,15 +37,14 @@ const AddProject: React.FC = () => {
         governance_model: governanceModel,
         website_url: websiteUrl,
         contact_email: contactEmail,
-        // If logged in, include user ID; if not, leave null.
-        submitted_by: supabase.auth.session()?.user?.id || null
+        submitted_by: session?.user?.id || null,
       };
 
-      const { data, error } = await axios.post('/api/projects/add', payload);
-      if (error) {
-        setError('Failed to add project.');
+      const response = await axios.post('/api/projects/add', payload);
+      if (response.data.error) {
+        setError(response.data.error);
       } else {
-        router.push(`/projects/${data.id}`);
+        router.push(`/projects/${response.data.id}`);
       }
     } catch (err: any) {
       console.error(err);
@@ -55,16 +60,33 @@ const AddProject: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block font-medium mb-1">Project Name</label>
-          <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full p-3 border rounded-lg" />
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
         </div>
         <div>
           <label className="block font-medium mb-1">Description</label>
-          <textarea required value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-3 border rounded-lg" rows={5} />
+          <textarea
+            required
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+            rows={5}
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block font-medium mb-1">Category</label>
-            <select required value={category} onChange={(e) => setCategory(e.target.value)} className="w-full p-3 border rounded-lg">
+            <select
+              required
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full p-3 border rounded-lg"
+            >
               <option value="">Select...</option>
               <option value="Climate">Climate</option>
               <option value="Education">Education</option>
@@ -76,7 +98,12 @@ const AddProject: React.FC = () => {
           </div>
           <div>
             <label className="block font-medium mb-1">Funding Platform</label>
-            <select required value={fundingPlatform} onChange={(e) => setFundingPlatform(e.target.value)} className="w-full p-3 border rounded-lg">
+            <select
+              required
+              value={fundingPlatform}
+              onChange={(e) => setFundingPlatform(e.target.value)}
+              className="w-full p-3 border rounded-lg"
+            >
               <option value="">Select...</option>
               <option value="Gitcoin">Gitcoin</option>
               <option value="Optimism RPGF">Optimism RPGF</option>
@@ -86,7 +113,12 @@ const AddProject: React.FC = () => {
           </div>
           <div>
             <label className="block font-medium mb-1">Governance Model</label>
-            <select required value={governanceModel} onChange={(e) => setGovernanceModel(e.target.value)} className="w-full p-3 border rounded-lg">
+            <select
+              required
+              value={governanceModel}
+              onChange={(e) => setGovernanceModel(e.target.value)}
+              className="w-full p-3 border rounded-lg"
+            >
               <option value="">Select...</option>
               <option value="DAO">DAO</option>
               <option value="Quadratic Funding">Quadratic Funding</option>
@@ -96,16 +128,32 @@ const AddProject: React.FC = () => {
           </div>
           <div>
             <label className="block font-medium mb-1">Impact Areas (comma-separated)</label>
-            <input type="text" required value={impactAreas} onChange={(e) => setImpactAreas(e.target.value)} className="w-full p-3 border rounded-lg" />
+            <input
+              type="text"
+              required
+              value={impactAreas}
+              onChange={(e) => setImpactAreas(e.target.value)}
+              className="w-full p-3 border rounded-lg"
+            />
           </div>
         </div>
         <div>
           <label className="block font-medium mb-1">Website URL</label>
-          <input type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} className="w-full p-3 border rounded-lg" />
+          <input
+            type="url"
+            value={websiteUrl}
+            onChange={(e) => setWebsiteUrl(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
         </div>
         <div>
           <label className="block font-medium mb-1">Contact Email</label>
-          <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full p-3 border rounded-lg" />
+          <input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            className="w-full p-3 border rounded-lg"
+          />
         </div>
         <button
           type="submit"
