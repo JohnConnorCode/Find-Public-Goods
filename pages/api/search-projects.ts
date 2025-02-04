@@ -1,3 +1,4 @@
+// pages/api/search-projects.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 
@@ -5,14 +6,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { query, category, funding_platform, governance_model, status } = req.query;
+  // Rename the search query parameter so it doesn't conflict with reserved words.
+  const { query: searchQuery, category, funding_platform, governance_model, status } = req.query;
   try {
     let queryBuilder = supabase
       .from('projects')
       .select('*');
 
-    if (query && typeof query === 'string' && query.trim().length > 0) {
-      queryBuilder = queryBuilder.textSearch('search_vector', query);
+    // Use a case-insensitive filter on both name and description.
+    if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim().length > 0) {
+      queryBuilder = queryBuilder.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
     }
     if (category && typeof category === 'string') {
       queryBuilder = queryBuilder.eq('category', category);
