@@ -35,20 +35,22 @@ const Header: React.FC = () => {
           <Link href="/projects/add" className="hover:text-blue-600">
             Add Project
           </Link>
-          {user ? (
-            <>
-              <Link href="/profile" className="hover:text-blue-600">
-                My Profile
-              </Link>
-              <button onClick={handleLogout} className="hover:text-blue-600">
-                Log Out
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="hover:text-blue-600">
-              Log In
-            </Link>
-          )}
+          
+{user ? (
+  <>
+    <Link href="/profile" className="hover:text-blue-600">
+      My Profile
+    </Link>
+    <button onClick={handleLogout} className="hover:text-blue-600">
+      Log Out
+    </button>
+  </>
+) : (
+  <Link href="/auth" className="hover:text-blue-600">
+    Log In / Register
+  </Link>
+)}
+
         </nav>
       </div>
     </header>
