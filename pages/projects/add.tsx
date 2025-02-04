@@ -23,10 +23,8 @@ const AddProject: React.FC = () => {
     setLoading(true);
 
     try {
-      // In Supabase v2, use getSession() to retrieve the current session.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // Use getSession() to fetch the current session in Supabase v2.
+      const { data: { session } } = await supabase.auth.getSession();
 
       const payload = {
         name,
