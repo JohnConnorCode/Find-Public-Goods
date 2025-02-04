@@ -105,7 +105,7 @@ const Home: React.FC = () => {
         {loading && <p className="text-center">Loading projects...</p>}
         {error && <p className="text-center text-red-600">{error}</p>}
         {!loading && !error && displayProjects.length === 0 && (
-          <p className="text-center">No projects found.</p>
+          <p className="text-center">Sorry, no projects found.</p>
         )}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {displayProjects.map((project) => (
