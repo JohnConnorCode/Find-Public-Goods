@@ -36,6 +36,7 @@ const Header: React.FC = () => {
             Add Project
           </Link>
           
+          
 {user ? (
   <>
     <Link href="/profile" className="hover:text-blue-600">
@@ -50,6 +51,7 @@ const Header: React.FC = () => {
     Log In / Register
   </Link>
 )}
+
 
         </nav>
       </div>
