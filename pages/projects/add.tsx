@@ -16,7 +16,7 @@ const AddProject: React.FC = () => {
   const [governanceModel, setGovernanceModel] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  // Instead of text inputs for image URLs, we use state to store the public URL after upload.
+  // Instead of text URLs, we'll upload images to Supabase Storage.
   const [projectProfileImageUrl, setProjectProfileImageUrl] = useState('');
   const [projectBannerImageUrl, setProjectBannerImageUrl] = useState('');
   const [error, setError] = useState('');
@@ -25,15 +25,15 @@ const AddProject: React.FC = () => {
   // Repeater field for impact areas
   const addImpactArea = () => setImpactAreas((prev) => [...prev, '']);
   const updateImpactArea = (index: number, value: string) => {
-    const updated = [...impactAreas];
-    updated[index] = value;
-    setImpactAreas(updated);
+    const newImpactAreas = [...impactAreas];
+    newImpactAreas[index] = value;
+    setImpactAreas(newImpactAreas);
   };
   const removeImpactArea = (index: number) => {
     setImpactAreas(impactAreas.filter((_, i) => i !== index));
   };
 
-  // File upload helper
+  // File upload helper that uploads an image file and returns its public URL.
   const uploadImage = async (file: File, type: 'profile' | 'banner'): Promise<string | null> => {
     if (file.size > MAX_FILE_SIZE) {
       setError('File is too large. Maximum allowed size is 1MB.');
@@ -43,22 +43,26 @@ const AddProject: React.FC = () => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${type}-${Date.now()}.${fileExt}`;
     const filePath = `${type}/${fileName}`;
-    const { data, error } = await supabase.storage
+
+    const { error: uploadError } = await supabase.storage
       .from('project-images')
       .upload(filePath, file, { upsert: true });
 
-    if (error) {
-      setError(error.message);
+    if (uploadError) {
+      setError(uploadError.message);
       return null;
     }
-    const { publicURL, error: publicUrlError } = supabase.storage
+
+    const { data: publicData, error: publicUrlError } = supabase.storage
       .from('project-images')
       .getPublicUrl(filePath);
+
     if (publicUrlError) {
       setError(publicUrlError.message);
       return null;
     }
-    return publicURL;
+    // Note: The returned property is "publicUrl"
+    return publicData.publicUrl;
   };
 
   // Handlers for file inputs
@@ -84,7 +88,9 @@ const AddProject: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
+      // Retrieve session for submitted_by field
       const { data: { session } } = await supabase.auth.getSession();
       const payload = {
         name,
@@ -99,9 +105,10 @@ const AddProject: React.FC = () => {
         project_banner_image: projectBannerImageUrl,
         submitted_by: session?.user?.id || null,
       };
-      const { data, error } = await axios.post('/api/projects/add', payload);
-      if (error) {
-        setError(error.message);
+
+      const { data, error: apiError } = await axios.post('/api/projects/add', payload);
+      if (apiError) {
+        setError(apiError.message);
       } else {
         router.push(`/projects/${data.id}`);
       }
@@ -187,7 +194,7 @@ const AddProject: React.FC = () => {
             </select>
           </div>
         </div>
-        {/* Impact Areas as Repeater Field */}
+        {/* Impact Areas as a Repeater Field */}
         <div>
           <label className="block font-medium mb-1">Impact Areas</label>
           {impactAreas.map((area, index) => (
