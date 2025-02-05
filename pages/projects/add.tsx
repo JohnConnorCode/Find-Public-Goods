@@ -16,13 +16,13 @@ const AddProject: React.FC = () => {
   const [governanceModel, setGovernanceModel] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
-  // Instead of text URLs, we'll upload images to Supabase Storage.
+  // Instead of text URLs, we upload images and store their public URLs.
   const [projectProfileImageUrl, setProjectProfileImageUrl] = useState('');
   const [projectBannerImageUrl, setProjectBannerImageUrl] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Repeater field for impact areas
+  // Repeater field functions for impact areas.
   const addImpactArea = () => setImpactAreas((prev) => [...prev, '']);
   const updateImpactArea = (index: number, value: string) => {
     const newImpactAreas = [...impactAreas];
@@ -33,7 +33,7 @@ const AddProject: React.FC = () => {
     setImpactAreas(impactAreas.filter((_, i) => i !== index));
   };
 
-  // File upload helper that uploads an image file and returns its public URL.
+  // File upload helper: uploads a file to Supabase Storage and returns its public URL.
   const uploadImage = async (file: File, type: 'profile' | 'banner'): Promise<string | null> => {
     if (file.size > MAX_FILE_SIZE) {
       setError('File is too large. Maximum allowed size is 1MB.');
@@ -43,7 +43,6 @@ const AddProject: React.FC = () => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${type}-${Date.now()}.${fileExt}`;
     const filePath = `${type}/${fileName}`;
-
     const { error: uploadError } = await supabase.storage
       .from('project-images')
       .upload(filePath, file, { upsert: true });
@@ -52,16 +51,15 @@ const AddProject: React.FC = () => {
       setError(uploadError.message);
       return null;
     }
-
-    const { data: publicData, error: publicUrlError } = supabase.storage
+    // getPublicUrl returns an object with a "publicUrl" property.
+    const { data: publicData } = supabase.storage
       .from('project-images')
       .getPublicUrl(filePath);
 
-    if (publicUrlError) {
-      setError(publicUrlError.message);
+    if (!publicData.publicUrl) {
+      setError('Error getting public URL.');
       return null;
     }
-    // Note: The returned property is "publicUrl"
     return publicData.publicUrl;
   };
 
@@ -124,7 +122,7 @@ const AddProject: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">Add a New Project</h1>
       {error && <p className="text-red-600 text-center mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic fields */}
+        {/* Basic Fields */}
         <div>
           <label className="block font-medium mb-1">Project Name</label>
           <input
