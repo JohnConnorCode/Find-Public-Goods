@@ -5,7 +5,7 @@ import axios from 'axios';
 interface DonateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string; // project id to link the donation
+  projectId: string;
 }
 
 const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose, projectId }) => {
@@ -23,13 +23,11 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose, projectId })
     }
     setLoading(true);
     try {
-      // Call the API endpoint for donations
       const response = await axios.post('/api/donate', {
         project_id: projectId,
         amount,
-        payment_method: 'crypto' // for now, hardcoded; can be expanded later
+        payment_method: 'crypto',
       });
-      // Check if our API returned an error message
       if (response.data.error) {
         setError(response.data.error);
       } else {
@@ -57,4 +55,25 @@ const DonateModal: React.FC<DonateModalProps> = ({ isOpen, onClose, projectId })
             value={amount}
             onChange={(e) => setAmount(Number(e.target.value))}
             className="w-full p-2 border rounded"
-            placeholder=
+            placeholder="Enter amount"
+          />
+        </div>
+        <button
+          onClick={handleDonate}
+          disabled={loading}
+          className="w-full bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition"
+        >
+          {loading ? 'Processing...' : 'Donate'}
+        </button>
+        <button
+          onClick={onClose}
+          className="mt-4 w-full border border-gray-300 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-100 transition"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default DonateModal;
