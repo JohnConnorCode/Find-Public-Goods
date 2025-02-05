@@ -22,7 +22,7 @@ const AddProject: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Repeater field functions for impact areas.
+  // Repeater field for impact areas
   const addImpactArea = () => setImpactAreas((prev) => [...prev, '']);
   const updateImpactArea = (index: number, value: string) => {
     const newImpactAreas = [...impactAreas];
@@ -104,11 +104,11 @@ const AddProject: React.FC = () => {
         submitted_by: session?.user?.id || null,
       };
 
-      const { data, error: apiError } = await axios.post('/api/projects/add', payload);
-      if (apiError) {
-        setError(apiError.message);
+      const response = await axios.post('/api/projects/add', payload);
+      if (response.data.error) {
+        setError(response.data.error);
       } else {
-        router.push(`/projects/${data.id}`);
+        router.push(`/projects/${response.data.id}`);
       }
     } catch (err: any) {
       console.error(err);
@@ -122,7 +122,7 @@ const AddProject: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">Add a New Project</h1>
       {error && <p className="text-red-600 text-center mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Basic Fields */}
+        {/* Basic fields */}
         <div>
           <label className="block font-medium mb-1">Project Name</label>
           <input
