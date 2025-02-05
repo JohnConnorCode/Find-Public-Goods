@@ -26,3 +26,56 @@ a {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+
+
+/* Multi-layer animated gradient background with dynamic movement */
+@keyframes web3Layer1 {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes web3Layer2 {
+  0% { background-position: 100% 0%; transform: rotate(0deg); }
+  50% { background-position: 0% 100%; transform: rotate(360deg); }
+  100% { background-position: 100% 0%; transform: rotate(0deg); }
+}
+
+.hero-bg .web3-layer1 {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, #ff0047, #2c34a3, #00ffaa, #ffcc00);
+  background-size: 200% 200%;
+  animation: web3Layer1 15s ease infinite;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.hero-bg .web3-layer2 {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #2c34a3, #ff0047, #ffcc00, #00ffaa);
+  background-size: 200% 200%;
+  animation: web3Layer2 20s ease infinite;
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.hero-bg:hover .web3-layer1,
+.hero-bg:hover .web3-layer2 {
+  animation-duration: 7s;
+}
+
+/* Global typography and background */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f3f4f6;
+}
+
+/* Optional: styling for search input icons if needed */
+
+
+
+
+
