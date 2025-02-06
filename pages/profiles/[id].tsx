@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 import { supabase } from '../../lib/supabaseClient';
-
-export interface Profile {
-  user_id: string;
-  username: string;
-  bio: string;
-  profile_photo?: string;
-  profile_banner_image?: string;
-  interests: string[];
-  social_links: string[];
-}
+import Link from 'next/link';
 
 const gradientClasses = [
   "bg-gradient-to-r from-purple-400 via-pink-500 to-red-500",
@@ -33,95 +24,127 @@ const getGradientClass = (id: string) => {
   return gradientClasses[index];
 };
 
-const ProfileDetail: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState('');
+export interface UserProfile {
+  user_id: string;
+  username: string;
+  bio: string;
+  interests: string[];
+  social_links: string[];
+  profile_photo: string;
+  profile_banner_image: string;
+}
+
+interface ProfileReviewProps {
+  profile: UserProfile | null;
+  error?: string;
+}
+
+const ProfileReview: React.FC<ProfileReviewProps> = ({ profile, error }) => {
+  const [bannerVisible, setBannerVisible] = useState(false);
+  const [cardVisible, setCardVisible] = useState(false);
   const [bannerBroken, setBannerBroken] = useState(false);
-  const [photoBroken, setPhotoBroken] = useState(false);
+  const [profileBroken, setProfileBroken] = useState(false);
 
+  // Faster fade-in: 300ms duration and 300ms delay
   useEffect(() => {
-    if (!id) return;
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('user_id', id)
-          .single();
-        if (error || !data) throw new Error(error?.message || 'Profile not found.');
-        setProfile(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load profile.');
-      }
-    };
-    fetchProfile();
-  }, [id]);
+    setBannerVisible(true);
+    const timer = setTimeout(() => setCardVisible(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
 
-  if (error) return <p className="text-center text-red-600 mt-6">{error}</p>;
-  if (!profile) return <p className="text-center mt-6">Loading profile...</p>;
+  if (error || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-600 text-xl">Error loading profile.</p>
+      </div>
+    );
+  }
 
-  const bannerContent = (profile.profile_banner_image && !bannerBroken) ? (
+  // Helper to check if URL exists and is non-empty
+  const hasImage = (url?: string) => Boolean(url && url.trim() !== "");
+
+  const bannerContent = (hasImage(profile.profile_banner_image) && !bannerBroken) ? (
     <img
       src={profile.profile_banner_image}
       alt="Profile Banner"
-      className="w-full h-48 object-cover rounded-lg shadow"
+      className="w-full h-80 object-cover rounded-lg shadow-md"
       onError={() => setBannerBroken(true)}
     />
   ) : (
-    <div className={`w-full h-48 rounded-lg shadow ${getGradientClass(profile.user_id)}`}></div>
+    <div className={`w-full h-80 rounded-lg shadow-md ${getGradientClass(profile.user_id)}`} />
   );
 
-  const photoContent = (profile.profile_photo && !photoBroken) ? (
+  const profileContent = (hasImage(profile.profile_photo) && !profileBroken) ? (
     <img
       src={profile.profile_photo}
       alt="Profile Photo"
-      className="w-20 h-20 rounded-full object-cover border-2 border-white"
-      onError={() => setPhotoBroken(true)}
+      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+      onError={() => setProfileBroken(true)}
     />
   ) : (
-    <div className={`w-20 h-20 rounded-full flex items-center justify-center border-2 border-white ${getGradientClass(profile.user_id)}`}>
-      <span className="text-white text-xl font-bold">{profile.username.charAt(0)}</span>
+    <div className={`w-24 h-24 rounded-full flex items-center justify-center border-4 border-white shadow ${getGradientClass(profile.user_id)}`}>
+      <span className="text-white text-3xl font-bold">
+        {profile.username ? profile.username.charAt(0) : 'U'}
+      </span>
     </div>
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      {/* Banner */}
-      <div className="mb-10">{bannerContent}</div>
-      <div className="bg-white rounded-lg shadow p-10">
-        <div className="flex items-center mb-10">
-          {photoContent}
-          <div className="ml-4">
-            <h1 className="text-4xl font-bold">{profile.username}</h1>
-            <p className="text-gray-500 mt-1">{profile.bio}</p>
+    <div className="max-w-5xl mx-auto px-4">
+      {/* Banner Section */}
+      <div className={`transition-opacity duration-300 ${bannerVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {bannerContent}
+      </div>
+      {/* Overlapping Content Card */}
+      <div className={`relative z-10 mx-auto -mt-20 transition-opacity duration-300 ${cardVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="bg-white rounded-lg shadow-xl p-8 max-w-3xl mx-auto">
+          <div className="flex items-center mb-6">
+            {profileContent}
+            <div className="ml-6">
+              <h1 className="text-3xl font-bold">{profile.username || 'User'}</h1>
+            </div>
           </div>
-        </div>
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold mb-4">Interests</h2>
-          <div className="flex flex-wrap">
-            {profile.interests.map((interest, idx) => (
-              <span key={idx} className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded mr-2 mb-2">
-                {interest}
-              </span>
-            ))}
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold mb-3">Bio</h2>
+            <p className="text-gray-700 leading-relaxed">{profile.bio || 'No bio provided.'}</p>
           </div>
-        </div>
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold mb-4">Social Links</h2>
-          <div className="flex flex-wrap">
-            {profile.social_links.map((link, idx) => (
-              <a
-                key={idx}
-                href={link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline mr-4 mb-2"
-              >
-                {link}
+          {profile.interests && profile.interests.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-3">Interests</h2>
+              <div className="flex flex-wrap gap-2">
+                {profile.interests.map((interest, idx) => (
+                  <span key={idx} className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded mr-2 mb-2">
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {profile.social_links && profile.social_links.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-3">Social Links</h2>
+              <ul className="space-y-2">
+                {profile.social_links.map((link, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="text-center">
+            <Link href="/profile/edit" legacyBehavior>
+              <a className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full shadow hover:bg-blue-700 transition">
+                Edit Profile
               </a>
-            ))}
+            </Link>
           </div>
         </div>
       </div>
@@ -129,4 +152,18 @@ const ProfileDetail: React.FC = () => {
   );
 };
 
-export default ProfileDetail;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params!;
+  const { data: profile, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('user_id', id)
+    .single();
+
+  if (error) {
+    return { props: { profile: null, error: error.message } };
+  }
+  return { props: { profile } };
+};
+
+export default ProfileReview;

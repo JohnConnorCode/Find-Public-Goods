@@ -6,6 +6,9 @@ const MAX_FILE_SIZE = 1048576; // 1MB
 
 const ProfileEdit: React.FC = () => {
   const router = useRouter();
+  const [fadeIn, setFadeIn] = useState(false);
+  
+  // Form field state
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
@@ -15,7 +18,12 @@ const ProfileEdit: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch the current user's profile data
+  // Fade-in effect on mount
+  useEffect(() => {
+    setFadeIn(true);
+  }, []);
+
+  // Fetch current user's profile
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -28,13 +36,13 @@ const ProfileEdit: React.FC = () => {
         .select('*')
         .eq('user_id', session.user.id)
         .single();
-      if (error) {
-        // If no profile exists, we initialize empty fields
+      if (error || !data) {
+        // No profile found, initialize empty
         setUsername('');
         setBio('');
         setInterests([]);
         setSocialLinks([]);
-      } else if (data) {
+      } else {
         setUsername(data.username || '');
         setBio(data.bio || '');
         setProfilePhotoUrl(data.profile_photo || '');
@@ -46,7 +54,7 @@ const ProfileEdit: React.FC = () => {
     fetchProfile();
   }, [router]);
 
-  // Helper: upload image file to Supabase Storage (in "profile-images" bucket)
+  // Helper: upload image file to Supabase Storage (bucket: "profile-images")
   const uploadImage = async (file: File, type: 'profile' | 'banner'): Promise<string | null> => {
     if (file.size > MAX_FILE_SIZE) {
       setError('File is too large. Maximum allowed size is 1MB.');
@@ -140,98 +148,122 @@ const ProfileEdit: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto my-16 p-8 bg-white rounded shadow">
-      <h1 className="text-3xl font-bold mb-6 text-center">Edit Your Profile</h1>
-      {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block font-medium mb-1">Display Name</label>
-          <input
-            type="text"
-            required
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-3 border rounded-lg"
-          />
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Bio</label>
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            className="w-full p-3 border rounded-lg"
-            rows={4}
-          />
-        </div>
-        {/* File Uploads */}
-        <div>
-          <label className="block font-medium mb-1">Upload Profile Banner Image (max 1MB)</label>
-          <input type="file" accept="image/*" onChange={handleProfileBannerChange} className="w-full" />
-          {profileBannerUrl && (
-            <div className="mt-2">
-              <img src={profileBannerUrl} alt="Banner Preview" className="w-full h-40 object-cover rounded" />
-            </div>
-          )}
-        </div>
-        <div>
-          <label className="block font-medium mb-1">Upload Profile Photo (max 1MB)</label>
-          <input type="file" accept="image/*" onChange={handleProfilePhotoChange} className="w-full" />
-          {profilePhotoUrl && (
-            <div className="mt-2">
-              <img src={profilePhotoUrl} alt="Profile Photo Preview" className="w-24 h-24 object-cover rounded" />
-            </div>
-          )}
-        </div>
-        {/* Interests Repeater */}
-        <div>
-          <label className="block font-medium mb-1">Interests</label>
-          {interests.map((interest, idx) => (
-            <div key={idx} className="flex items-center mb-2">
-              <input
-                type="text"
-                value={interest}
-                onChange={(e) => updateInterest(idx, e.target.value)}
-                className="flex-grow p-2 border rounded-lg"
-                placeholder="e.g., Renewable Energy"
-                required
-              />
-              <button type="button" onClick={() => removeInterest(idx)} className="ml-2 text-red-600 hover:text-red-800">
-                Remove
-              </button>
-            </div>
-          ))}
-          <button type="button" onClick={addInterest} className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">
-            Add Interest
-          </button>
-        </div>
-        {/* Social Links Repeater */}
-        <div>
-          <label className="block font-medium mb-1">Social Links (max 5)</label>
-          {socialLinks.map((link, idx) => (
-            <div key={idx} className="flex items-center mb-2">
-              <input
-                type="url"
-                value={link}
-                onChange={(e) => updateSocialLink(idx, e.target.value)}
-                className="flex-grow p-2 border rounded-lg"
-                placeholder="e.g., https://twitter.com/username"
-                required
-              />
-              <button type="button" onClick={() => removeSocialLink(idx)} className="ml-2 text-red-600 hover:text-red-800">
-                Remove
-              </button>
-            </div>
-          ))}
-          {socialLinks.length < 5 && (
-            <button type="button" onClick={addSocialLink} className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">
-              Add Social Link
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className={`max-w-2xl mx-auto my-16 p-8 bg-white rounded-lg shadow-lg transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+        <h1 className="text-4xl font-bold mb-8 text-center">Edit Your Profile</h1>
+        {error && <p className="text-red-600 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Display Name */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="username">Display Name</label>
+            <input
+              type="text"
+              id="username"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          {/* Bio */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1" htmlFor="bio">Bio</label>
+            <textarea
+              id="bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={4}
+            />
+          </div>
+          {/* Profile Banner Image */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Profile Banner Image (max 1MB)</label>
+            <input type="file" accept="image/*" onChange={handleProfileBannerChange} className="w-full" />
+            {profileBannerUrl && (
+              <div className="mt-2">
+                <img src={profileBannerUrl} alt="Banner Preview" className="w-full h-40 object-cover rounded" />
+              </div>
+            )}
+          </div>
+          {/* Profile Photo */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Profile Photo (max 1MB)</label>
+            <input type="file" accept="image/*" onChange={handleProfilePhotoChange} className="w-full" />
+            {profilePhotoUrl && (
+              <div className="mt-2">
+                <img src={profilePhotoUrl} alt="Profile Photo Preview" className="w-24 h-24 object-cover rounded" />
+              </div>
+            )}
+          </div>
+          {/* Interests Repeater */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Interests</label>
+            {interests.map((interest, idx) => (
+              <div key={idx} className="flex items-center mb-2">
+                <input
+                  type="text"
+                  value={interest}
+                  onChange={(e) => updateInterest(idx, e.target.value)}
+                  className="flex-grow p-2 border rounded-lg focus:outline-none"
+                  placeholder="e.g., Renewable Energy"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => removeInterest(idx)}
+                  className="ml-2 text-red-600 hover:text-red-800"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addInterest}
+              className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+            >
+              Add Interest
             </button>
-          )}
-        </div>
-        <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition">
-          {loading ? 'Saving...' : 'Save Profile'}
-        </button>
-      </form>
+          </div>
+          {/* Social Links Repeater */}
+          <div>
+            <label className="block text-gray-700 font-semibold mb-1">Social Links (max 5)</label>
+            {socialLinks.map((link, idx) => (
+              <div key={idx} className="flex items-center mb-2">
+                <input
+                  type="url"
+                  value={link}
+                  onChange={(e) => updateSocialLink(idx, e.target.value)}
+                  className="flex-grow p-2 border rounded-lg focus:outline-none"
+                  placeholder="e.g., https://twitter.com/username"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => removeSocialLink(idx)}
+                  className="ml-2 text-red-600 hover:text-red-800"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            {socialLinks.length < 5 && (
+              <button
+                type="button"
+                onClick={addSocialLink}
+                className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+              >
+                Add Social Link
+              </button>
+            )}
+          </div>
+          {/* Submit Button */}
+          <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition">
+            {loading ? 'Saving...' : 'Save Profile'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
