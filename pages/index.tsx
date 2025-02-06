@@ -1,9 +1,9 @@
-// pages/index.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import ProjectCard from '../components/ProjectCard';
 import FilterDrawer from '../components/FilterDrawer';
+import FadeInCard from '../components/FadeInCard';
 
 export interface Project {
   id: string;
@@ -127,13 +127,17 @@ const Home: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section
-        ref={headerRef}
-        className={`hero-bg relative h-[600px] flex items-center justify-center overflow-hidden transition-opacity duration-1000 ${headerVisible ? 'opacity-100' : 'opacity-0'}`}
-      >
-        {/* Animated Background Layers */}
+      <FadeInCard className="relative h-[600px] flex items-center justify-center overflow-hidden rounded-lg shadow-lg hero-bg">
+        {/* Animated Background Layers with geometric overlay */}
         <div className="absolute inset-0 web3-layer1"></div>
         <div className="absolute inset-0 web3-layer2"></div>
+        <div className="absolute inset-0 geometric-overlay pointer-events-none">
+          <svg className="w-full h-full opacity-20" viewBox="0 0 600 600">
+            <circle cx="300" cy="300" r="100" fill="white" />
+            <rect x="100" y="100" width="80" height="80" fill="white" opacity="0.5" />
+            <polygon points="500,100 550,200 450,200" fill="white" opacity="0.5"/>
+          </svg>
+        </div>
         {/* Semi-transparent overlay for contrast */}
         <div className="absolute inset-0 bg-black opacity-50"></div>
         {/* Content Overlay */}
@@ -148,14 +152,14 @@ const Home: React.FC = () => {
             </a>
           </Link>
         </div>
-      </section>
+      </FadeInCard>
 
       {/* How It Works Section */}
-      <section className="py-16 px-4 bg-white">
+      <FadeInCard className="py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6">How It Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
+            <FadeInCard className="p-4">
               <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-purple-500 to-pink-500">
                 <span className="text-white text-2xl font-bold">1</span>
               </div>
@@ -163,8 +167,8 @@ const Home: React.FC = () => {
               <p className="text-gray-600">
                 We gather projects automatically from trusted sources and allow manual submissions.
               </p>
-            </div>
-            <div>
+            </FadeInCard>
+            <FadeInCard className="p-4">
               <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-green-500 to-blue-500">
                 <span className="text-white text-2xl font-bold">2</span>
               </div>
@@ -172,8 +176,8 @@ const Home: React.FC = () => {
               <p className="text-gray-600">
                 Our AI generates clear and concise summaries to help you quickly understand complex projects.
               </p>
-            </div>
-            <div>
+            </FadeInCard>
+            <FadeInCard className="p-4">
               <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-red-500 to-orange-500">
                 <span className="text-white text-2xl font-bold">3</span>
               </div>
@@ -181,15 +185,14 @@ const Home: React.FC = () => {
               <p className="text-gray-600">
                 Support projects with crypto or fiat donations while tracking funding goals and milestones in real time.
               </p>
-            </div>
+            </FadeInCard>
           </div>
         </div>
-      </section>
+      </FadeInCard>
 
       {/* Search & Filter Section */}
       <section className="py-8 px-4 max-w-4xl mx-auto">
         <div className="flex flex-col gap-4">
-          {/* Search Bar */}
           <div className="flex items-center bg-white rounded-lg shadow p-3">
             <svg className="h-6 w-6 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m2.1-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
@@ -202,7 +205,6 @@ const Home: React.FC = () => {
               className="w-full p-2 border-none focus:outline-none"
             />
           </div>
-          {/* Filter Drawer */}
           <div className="bg-white rounded-lg shadow p-4">
             <FilterDrawer filters={filters} onChange={handleFilterChange} />
           </div>
@@ -237,11 +239,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-4 bg-gray-100">
+      <FadeInCard className="py-16 px-4 bg-gray-100">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-8">Frequently Asked Questions</h2>
           {faqData.map((faq, index) => (
-            <div key={index} className="border-b border-gray-300 py-4">
+            <FadeInCard key={index} className="border-b border-gray-300 py-4">
               <div
                 className="flex justify-between items-center cursor-pointer font-medium"
                 onClick={() => toggleFaq(index)}
@@ -261,10 +263,30 @@ const Home: React.FC = () => {
                   <p>{faq.answer}</p>
                 </div>
               )}
-            </div>
+            </FadeInCard>
           ))}
         </div>
-      </section>
+      </FadeInCard>
+
+      <style jsx>{`
+        /* Hero section gradient animation and geometric overlay */
+        .hero-bg {
+          animation: gradientAnim 10s ease infinite;
+        }
+        @keyframes gradientAnim {
+          0% { background: linear-gradient(45deg, #4F46E5, #10B981); }
+          50% { background: linear-gradient(45deg, #10B981, #F59E0B); }
+          100% { background: linear-gradient(45deg, #4F46E5, #10B981); }
+        }
+        .geometric-overlay {
+          animation: shapeAnim 20s linear infinite;
+        }
+        @keyframes shapeAnim {
+          0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+          50% { transform: translate(10px, 10px) scale(1.05); opacity: 0.3; }
+          100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+        }
+      `}</style>
     </div>
   );
 };
