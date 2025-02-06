@@ -23,7 +23,7 @@ interface Filters {
 
 const Home: React.FC = () => {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
-  const [displayCount, setDisplayCount] = useState<number>(9);
+  const [displayCount, setDisplayCount] = useState<number>(6);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [filters, setFilters] = useState<Filters>({});
   const [error, setError] = useState<string>('');
@@ -32,7 +32,6 @@ const Home: React.FC = () => {
   // Header fade-in effect using Intersection Observer.
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerVisible, setHeaderVisible] = useState(false);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -51,7 +50,7 @@ const Home: React.FC = () => {
     };
   }, []);
 
-  // Utility: Shuffle array randomly.
+  // Utility: Shuffle an array randomly.
   const shuffleArray = (array: Project[]) => {
     return array
       .map((p) => ({ sort: Math.random(), value: p }))
@@ -64,21 +63,20 @@ const Home: React.FC = () => {
       setLoading(true);
       setError('');
       try {
-        // Build query parameters.
         const params: any = {};
         if (searchQuery.trim() !== '') params.query = searchQuery;
         if (filters.category) params.category = filters.category;
         if (filters.funding_platform) params.funding_platform = filters.funding_platform;
         if (filters.governance_model) params.governance_model = filters.governance_model;
         if (filters.status) params.status = filters.status;
-
+        
         const { data } = await axios.get('/api/search-projects', { params });
         let projects = data;
         if (!searchQuery && Object.keys(filters).length === 0) {
           projects = shuffleArray(data);
         }
         setAllProjects(projects);
-        setDisplayCount(9); // Reset count on filter change.
+        setDisplayCount(6); // Reset count on filter change.
       } catch (err: any) {
         console.error(err);
         setError('Failed to load projects.');
@@ -97,6 +95,35 @@ const Home: React.FC = () => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
+  // FAQ Data
+  const faqData = [
+    {
+      question: 'How does the platform work?',
+      answer:
+        'We aggregate decentralized public goods projects from multiple sources, generate clear AI-powered summaries, and enable both crypto and fiat donations. Funding goals and milestones are tracked in real time.',
+    },
+    {
+      question: 'How can I donate to a project?',
+      answer:
+        'Navigate to a project page, select your donation amount, and choose either crypto or fiat. Your donation helps the project reach its funding target and achieve milestones.',
+    },
+    {
+      question: 'Can I submit a project manually?',
+      answer:
+        'Yes, you can add a project using our "Add Project" page. We also automatically pull projects from trusted sources.',
+    },
+    {
+      question: 'How are project summaries generated?',
+      answer:
+        'Our AI analyzes detailed project descriptions and generates concise, accessible summaries for each project.',
+    },
+  ];
+
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const toggleFaq = (index: number) => {
+    setOpenFaqIndex((prev) => (prev === index ? null : index));
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -107,22 +134,55 @@ const Home: React.FC = () => {
         {/* Animated Background Layers */}
         <div className="absolute inset-0 web3-layer1"></div>
         <div className="absolute inset-0 web3-layer2"></div>
-        {/* Semi-transparent overlay for text contrast */}
+        {/* Semi-transparent overlay for contrast */}
         <div className="absolute inset-0 bg-black opacity-50"></div>
         {/* Content Overlay */}
         <div className="relative z-10 text-center text-white px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            Empowering the Future of Web3 <br></br>Public Goods
-          </h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">Find Public Goods</h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            Explore groundbreaking projects transforming decentralized funding, transparent governance, and community impact.
-            Join us on the journey to reshape tomorrow.
+            We aggregate decentralized public goods projects from multiple sources, generate concise AI-powered summaries, and enable donations through crypto or fiat. Track funding goals and milestones in real time.
           </p>
           <Link legacyBehavior href="/projects">
             <a className="inline-block bg-white text-blue-600 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-100 transition">
               Explore Projects
             </a>
           </Link>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-purple-500 to-pink-500">
+                <span className="text-white text-2xl font-bold">1</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Aggregate Projects</h3>
+              <p className="text-gray-600">
+                We gather projects automatically from trusted sources and allow manual submissions.
+              </p>
+            </div>
+            <div>
+              <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-green-500 to-blue-500">
+                <span className="text-white text-2xl font-bold">2</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">AI-Powered Summaries</h3>
+              <p className="text-gray-600">
+                Our AI generates clear and concise summaries to help you quickly understand complex projects.
+              </p>
+            </div>
+            <div>
+              <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-gradient-to-r from-red-500 to-orange-500">
+                <span className="text-white text-2xl font-bold">3</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Donate & Track</h3>
+              <p className="text-gray-600">
+                Support projects with crypto or fiat donations while tracking funding goals and milestones in real time.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -149,28 +209,61 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Projects Grid Section */}
+      {/* Featured Projects Section */}
       <section className="py-8 px-4">
-        {loading && <p className="text-center">Loading projects...</p>}
-        {error && <p className="text-center text-red-600">{error}</p>}
-        {!loading && !error && allProjects.length === 0 && (
-          <p className="text-center">Sorry, no projects found.</p>
-        )}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {allProjects.slice(0, displayCount).map((project) => (
-            <ProjectCard key={project.id} project={project} />
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-8">Featured Projects</h2>
+          {loading && <p className="text-center">Loading projects...</p>}
+          {error && <p className="text-center text-red-600">{error}</p>}
+          {!loading && !error && allProjects.length === 0 && (
+            <p className="text-center">Sorry, no projects found.</p>
+          )}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {allProjects.slice(0, displayCount).map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+          {allProjects.length > displayCount && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={loadMore}
+                className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition"
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          {faqData.map((faq, index) => (
+            <div key={index} className="border-b border-gray-300 py-4">
+              <div
+                className="flex justify-between items-center cursor-pointer font-medium"
+                onClick={() => toggleFaq(index)}
+              >
+                <span>{faq.question}</span>
+                <svg
+                  className={`h-6 w-6 transform transition-transform duration-300 ${openFaqIndex === index ? 'rotate-180' : 'rotate-0'}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              {openFaqIndex === index && (
+                <div className="mt-2 text-gray-700">
+                  <p>{faq.answer}</p>
+                </div>
+              )}
+            </div>
           ))}
         </div>
-        {allProjects.length > displayCount && (
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={loadMore}
-              className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition"
-            >
-              Load More
-            </button>
-          </div>
-        )}
       </section>
     </div>
   );

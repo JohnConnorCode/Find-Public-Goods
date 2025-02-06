@@ -71,9 +71,26 @@ a {
 body {
   font-family: 'Inter', sans-serif;
   background-color: #f3f4f6;
+  margin: 0;
+  padding: 0;
 }
 
-/* Optional: styling for search input icons if needed */
+/* Simple FAQ accordion styling */
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.faq-question {
+  cursor: pointer;
+  padding: 1rem 0;
+  font-weight: 500;
+}
+
+.faq-answer {
+  padding: 0.5rem 0;
+  color: #4b5563;
+}
+
 
 
 
