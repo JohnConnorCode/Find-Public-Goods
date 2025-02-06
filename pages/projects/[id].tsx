@@ -3,6 +3,7 @@ import { GetServerSideProps } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 import DonateModal from '../../components/DonateModal';
 import Link from 'next/link';
+import FadeInCard from '../../components/FadeInCard';
 
 export interface Project {
   id: string;
@@ -49,14 +50,10 @@ interface ProjectDetailProps {
 
 const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, error }) => {
   const [bannerVisible, setBannerVisible] = useState(false);
-  const [cardVisible, setCardVisible] = useState(false);
-  const [donateOpen, setDonateOpen] = useState<boolean>(false);
+  const [donateOpen, setDonateOpen] = useState(false);
 
-  // Fade in banner and then card (faster: 300ms duration, 300ms delay)
   useEffect(() => {
     setBannerVisible(true);
-    const timer = setTimeout(() => setCardVisible(true), 300);
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -74,7 +71,6 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, error }) => {
     );
   }
 
-  // Helper: check if a URL exists and is non-empty.
   const hasImage = (url?: string) => Boolean(url && url.trim() !== "");
 
   const bannerContent = hasImage(project.project_banner_image) ? (
@@ -100,9 +96,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, error }) => {
       }}
     />
   ) : (
-    <div
-      className={`w-20 h-20 rounded-full flex items-center justify-center border-4 border-white shadow ${getGradientClass(project.id)}`}
-    >
+    <div className={`w-20 h-20 rounded-full flex items-center justify-center border-4 border-white shadow ${getGradientClass(project.id)}`}>
       <span className="text-white text-2xl font-bold">{project.name.charAt(0)}</span>
     </div>
   );
@@ -113,8 +107,8 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, error }) => {
       <div className={`transition-opacity duration-300 ${bannerVisible ? 'opacity-100' : 'opacity-0'}`}>
         {bannerContent}
       </div>
-      {/* Overlapping Content Card */}
-      <div className={`relative z-10 mx-auto -mt-20 transition-opacity duration-300 ${cardVisible ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Content Card: on mobile, add top margin; on md and above, overlap banner */}
+      <FadeInCard className="relative z-10 mx-auto mt-4 md:-mt-20 transform transition duration-500 ease-out">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-3xl mx-auto">
           <div className="flex items-center mb-6">
             {profileContent}
@@ -189,7 +183,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, error }) => {
             projectId={project.id}
           />
         </div>
-      </div>
+      </FadeInCard>
     </div>
   );
 };

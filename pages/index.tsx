@@ -144,7 +144,7 @@ const Home: React.FC = () => {
         <div className="relative z-10 text-center text-white px-4">
           <h1 className="text-5xl md:text-6xl font-bold mb-4">Find Public Goods</h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-            We aggregate decentralized public goods projects from multiple sources, generate concise AI-powered summaries, and enable donations through crypto or fiat. Track funding goals and milestones in real time.
+            We aggregate decentralized public goods projects from multiple sources, generate concise AI-powered summaries, and enable donations through crypto or fiat. Track funding goals and milestones.
           </p>
           <Link legacyBehavior href="/projects">
             <a className="inline-block bg-white text-blue-600 font-bold px-8 py-4 rounded-full shadow-lg hover:bg-gray-100 transition">
