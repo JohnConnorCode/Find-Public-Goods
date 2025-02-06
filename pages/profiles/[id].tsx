@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GetServerSideProps } from 'next';
 import { supabase } from '../../lib/supabaseClient';
 import Link from 'next/link';
+import FadeInCard from '../../components/FadeInCard';
 
 const gradientClasses = [
   "bg-gradient-to-r from-purple-400 via-pink-500 to-red-500",
@@ -41,15 +42,12 @@ interface ProfileReviewProps {
 
 const ProfileReview: React.FC<ProfileReviewProps> = ({ profile, error }) => {
   const [bannerVisible, setBannerVisible] = useState(false);
-  const [cardVisible, setCardVisible] = useState(false);
   const [bannerBroken, setBannerBroken] = useState(false);
   const [profileBroken, setProfileBroken] = useState(false);
 
-  // Faster fade-in: 300ms duration and 300ms delay
+  // Trigger fade-in of the banner on mount.
   useEffect(() => {
     setBannerVisible(true);
-    const timer = setTimeout(() => setCardVisible(true), 300);
-    return () => clearTimeout(timer);
   }, []);
 
   if (error || !profile) {
@@ -60,7 +58,6 @@ const ProfileReview: React.FC<ProfileReviewProps> = ({ profile, error }) => {
     );
   }
 
-  // Helper to check if URL exists and is non-empty
   const hasImage = (url?: string) => Boolean(url && url.trim() !== "");
 
   const bannerContent = (hasImage(profile.profile_banner_image) && !bannerBroken) ? (
@@ -92,11 +89,12 @@ const ProfileReview: React.FC<ProfileReviewProps> = ({ profile, error }) => {
   return (
     <div className="max-w-5xl mx-auto px-4">
       {/* Banner Section */}
-      <div className={`transition-opacity duration-300 ${bannerVisible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="transition-opacity duration-300 ease-out opacity-100">
         {bannerContent}
       </div>
-      {/* Overlapping Content Card */}
-      <div className={`relative z-10 mx-auto -mt-20 transition-opacity duration-300 ${cardVisible ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Content Card */}
+      {/* On mobile: use margin-top (mt-4) so card sits below banner; on desktop (md:), use negative margin (md:-mt-20) so it overlaps */}
+      <FadeInCard className="relative z-10 mx-auto mt-4 md:-mt-20">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-3xl mx-auto">
           <div className="flex items-center mb-6">
             {profileContent}
@@ -147,7 +145,7 @@ const ProfileReview: React.FC<ProfileReviewProps> = ({ profile, error }) => {
             </Link>
           </div>
         </div>
-      </div>
+      </FadeInCard>
     </div>
   );
 };
