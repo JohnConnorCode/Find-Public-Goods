@@ -1,7 +1,7 @@
-// pages/auth.tsx
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import FadeInCard from '../components/FadeInCard';
 
 const AuthPage: React.FC = () => {
   const router = useRouter();
@@ -60,7 +60,7 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-16 p-8 bg-white rounded shadow">
+    <FadeInCard className="max-w-md mx-auto my-16 p-8 bg-white rounded-lg shadow-xl">
       <h1 className="text-3xl font-bold mb-6 text-center">
         {isLogin ? 'Log In' : 'Register'}
       </h1>
@@ -125,7 +125,7 @@ const AuthPage: React.FC = () => {
           </>
         )}
       </div>
-    </div>
+    </FadeInCard>
   );
 };
 
