@@ -1,7 +1,9 @@
 import React from 'react';
+import FadeInCard from '../components/FadeInCard';
 
 const Footer: React.FC = () => {
   return (
+    <FadeInCard>
     <footer className="bg-gray-100 py-4 mt-8">
       <div className="text-center text-gray-600">
         <a href="/about" className="mx-2 hover:underline">About</a>
@@ -13,6 +15,7 @@ const Footer: React.FC = () => {
         &copy; {new Date().getFullYear()} Find Public Goods
       </div>
     </footer>
+    </FadeInCard>
   );
 };
 

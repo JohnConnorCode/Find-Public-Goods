@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ProjectCard from '../../components/ProjectCard';
 import FilterDrawer from '../../components/FilterDrawer';
+import FadeInCard from '../../components/FadeInCard';
 
 export interface Project {
   id: string;
@@ -56,8 +57,10 @@ const ProjectsIndex: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
+      <FadeInCard>
       <h1 className="text-4xl font-bold text-center mb-8">Projects</h1>
-
+      </FadeInCard>
+      <FadeInCard>
       {/* Search & Filter Section */}
       <div className="flex flex-col gap-4 mb-8">
         {/* Search Bar */}
@@ -78,6 +81,8 @@ const ProjectsIndex: React.FC = () => {
           <FilterDrawer filters={filters} onChange={handleFilterChange} />
         </div>
       </div>
+      </FadeInCard>
+      
 
       {/* Projects Grid Section */}
       {loading && <p className="text-center">Loading projects...</p>}

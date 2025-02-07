@@ -142,7 +142,7 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-black opacity-50"></div>
         {/* Content Overlay */}
         <div className="relative z-10 text-center text-white px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">Find Public Goods</h1>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4">Fund Public Goods</h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
             We aggregate decentralized public goods projects from multiple sources, generate concise AI-powered summaries, and enable donations through crypto or fiat. Track funding goals and milestones.
           </p>
@@ -190,31 +190,44 @@ const Home: React.FC = () => {
         </div>
       </FadeInCard>
 
-      {/* Search & Filter Section */}
-      <section className="py-8 px-4 max-w-4xl mx-auto">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center bg-white rounded-lg shadow p-3">
-            <svg className="h-6 w-6 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m2.1-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 border-none focus:outline-none"
-            />
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <FilterDrawer filters={filters} onChange={handleFilterChange} />
-          </div>
-        </div>
-      </section>
+{/* Search & Filter Section */}
+<FadeInCard className="py-8 px-4 max-w-4xl mx-auto">
+  <div className="flex flex-col gap-4">
+    <div className="flex items-center bg-white rounded-lg shadow p-3">
+      <svg
+        className="h-6 w-6 text-gray-500 mr-2"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M21 21l-4.35-4.35m2.1-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        placeholder="Search projects..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full p-2 border-none focus:outline-none"
+      />
+    </div>
+    <div className="bg-white rounded-lg shadow p-4">
+      <FilterDrawer filters={filters} onChange={handleFilterChange} />
+    </div>
+  </div>
+</FadeInCard>
+
 
       {/* Featured Projects Section */}
       <section className="py-8 px-4">
         <div className="max-w-6xl mx-auto">
+        <FadeInCard>
           <h2 className="text-4xl font-bold text-center mb-8">Featured Projects</h2>
+          </FadeInCard>
           {loading && <p className="text-center">Loading projects...</p>}
           {error && <p className="text-center text-red-600">{error}</p>}
           {!loading && !error && allProjects.length === 0 && (
